@@ -1,0 +1,80 @@
+---
+title: "Samples"
+---
+
+```{r setup, include=FALSE}
+source(file.path(PROJHOME, "src/r/setup.R"))
+setup()
+```
+
+```{r define-vars}
+ref_epigenomes <- "/projects/edcc_new/reference_epigenomes"
+out_finder <- file.path(PROJHOME, "metadata/listoffiles.h3k4me3.finder.txt")
+```
+
+
+```{r count-cemt}
+cemt_dirs <-
+  list.files(ref_epigenomes, pattern = "^CEMT_", full.names = TRUE)
+
+paste("Number of CEMT dirs:", length(cemt_dirs))
+```
+
+```{r count-h3k4me3}
+h3k4me3_dirs <-
+  lapply(cemt_dirs, function(x){
+    Sys.glob(file.path(x, "bams/ChIP-Seq/H3K4me3"))
+    }) %>%
+  unlist()
+
+paste("Number of CEMT/H3K4me3 dirs:", length(h3k4me3_dirs))
+```
+
+```{r count-finder}
+finder_files <-
+  lapply(h3k4me3_dirs, function(x){
+    Sys.glob(file.path(x, "FindER.1.0.0b/*gz"))
+    }) %>%
+  unlist() %>%
+  tibble::tibble(files = .) %>%
+  mutate(
+    sample = sub(".*(CEMT_\\d+).*", "\\1", files)
+    )
+
+paste("Number of CEMT/H3K4me3/FindER.1.0.0b/*gz files:", nrow(finder_files))
+```
+
+Check for duplicate FindER calls:
+
+```{r finder-dup}
+(dup_finder <-
+  finder_files %>%
+  count(sample) %>%
+  filter(n > 1) %>%
+  arrange(desc(n), sample)
+)
+```
+
+```{r}
+finder_files_nodup <-
+  finder_files %>%
+  mutate(
+    merged = grepl("merged", files),
+    dup_id = sample %in% dup_finder$sample
+  ) %>%
+  filter(!dup_id | (dup_id & merged)) 
+
+# Print results
+finder_files_nodup %>%
+  select(files) %>%
+  readr::write_tsv(out_finder)
+
+message01 <- sprintf(
+  "List of %s FindER files (dups removed) located at:\n`%s`",
+  nrow(finder_files_nodup),
+  out_finder)
+```
+
+## Sample counts
+
+`r message01`

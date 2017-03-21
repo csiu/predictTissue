@@ -1,0 +1,12 @@
+name: "predict-tissue"
+output_dir: "../../www"
+
+navbar:
+  title: "predict-tissue"
+  left:
+    - text: "Hello world"
+      href: samples-h3k4me3.html
+
+output:
+  html_document:
+    toc: true
