@@ -4,8 +4,12 @@ output_dir: "../../www"
 navbar:
   title: "predict-tissue"
   left:
-    - text: "Hello world"
-      href: samples-h3k4me3.html
+    - text: "Input"
+      menu:
+      - text: "Sample"
+        href: samples-h3k4me3.html
+      - text: "Features"
+        href: features.html
 
 output:
   html_document:

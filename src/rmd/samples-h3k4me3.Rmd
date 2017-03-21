@@ -8,10 +8,15 @@ setup()
 ```
 
 ```{r define-vars}
+# Input to get samples & sample annotations
 ref_epigenomes <- "/projects/edcc_new/reference_epigenomes"
+sample_meta <- file.path(PROJHOME, "metadata/CEMT_EDCC_status.txt")
+
+# Output file
 out_finder <- file.path(PROJHOME, "metadata/listoffiles.h3k4me3.finder.txt")
 ```
 
+## Samples with H3K4me3 enrichment calls
 
 ```{r count-cemt}
 cemt_dirs <-
@@ -55,26 +60,95 @@ Check for duplicate FindER calls:
 )
 ```
 
-```{r}
+```{r finder-dup-rm}
+# Remove dups
 finder_files_nodup <-
   finder_files %>%
   mutate(
     merged = grepl("merged", files),
     dup_id = sample %in% dup_finder$sample
   ) %>%
-  filter(!dup_id | (dup_id & merged)) 
+  filter(!dup_id | (dup_id & merged))
 
 # Print results
-finder_files_nodup %>%
-  select(files) %>%
-  readr::write_tsv(out_finder)
-
 message01 <- sprintf(
   "List of %s FindER files (dups removed) located at:\n`%s`",
   nrow(finder_files_nodup),
   out_finder)
 ```
 
-## Sample counts
+```{r save-data}
+finder_files_nodup %>%
+  select(files) %>%
+  readr::write_tsv(out_finder, col_names = FALSE)
+```
 
 `r message01`
+
+## Sample pathology
+
+```{r load-annot}
+sample_info <-
+  readr::read_tsv(sample_meta, skip = 1, col_names = c(
+    "sample_id", "original_id","aim", "pi",
+    "sample_type", "tissue", "pool", "pathology")) %>%
+  select(sample_id, sample_type, tissue, pathology) %>%
+  mutate(
+    sample_id = sub("^(CEMT_\\d+) .*", "\\1", sample_id),
+    sample_id = ifelse(sample_id == "CEMT-28 - sort big", "CEMT_28", sample_id),
+    sample_type = sub("^(.*) -.*", "\\1", sample_type) %>% as.factor,
+    pathology = as.factor(pathology)
+  ) %>%
+  unique() %>%
+  filter(grepl("^CEMT", sample_id)) %>%
+  mutate(
+    cemt_number = sub("^CEMT_", "", sample_id) %>% as.integer
+  )
+
+# Add annot on FindER data
+db_for_analysis <-
+  left_join(finder_files_nodup, sample_info, by = c("sample" = "sample_id")) %>%
+  mutate(
+    tissue2 =
+      ifelse(tissue %in% c("Cord blood", "PB CD19+", "PB CD34+"),
+             "Blood", tissue) %>% as.factor)
+```
+
+```{r hist-sample-tissuetypes, fig.height=3.5, fig.width=8}
+db_for_analysis %>%
+  ggplot(aes(x = tissue, fill = pathology)) +
+  geom_bar() +
+  ggtitle(sprintf("%s samples with FindER enrichment calls",
+                  nrow(finder_files_nodup)))
+```
+
+- Pathology taken from: https://www.bcgsc.ca/wiki/display/EDCC/CEMTech
+- Many divisions
+- Not all normal
+
+## Samples for analysis
+
+- Ideally, want to use more samples
+- Thus cannot be too stringent
+- Thus samples will be divided by tissue type
+
+```{r hist-sample-tissuecounts, fig.height=3.5, fig.width=8}
+db_for_analysis %>%
+  count(tissue2) %>%
+  ggplot(aes(x = reorder(tissue2, -n),
+             y = n,
+             label = n
+             )) +
+  geom_bar(stat="identity") +
+  geom_text(vjust=2, color="white") +
+  xlab("Tissue") +
+  ylab("Count")
+```
+
+```{r show-table}
+db_for_analysis %>%
+  arrange(cemt_number) %>%
+  select(sample, tissue=tissue2, type=sample_type, pathology) %>%
+  DT::datatable(filter = "top")
+```
+
