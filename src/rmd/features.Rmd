@@ -1,0 +1,95 @@
+---
+title: "Features"
+---
+
+```{r setup, include=FALSE}
+source(file.path(PROJHOME, "src/r/setup.R"))
+setup()
+
+library(rtracklayer)
+```
+
+```{r define-files}
+gene_file <- file.path(PROJHOME, "reference/Homo_sapiens.GRCh37.75.gtf.chr.pcgene")
+bin_file <- file.path(PROJHOME, "reference/hg19.200bpbins.bed.srt")
+
+promoter_file <- file.path(PROJHOME, "results/features/promoter",
+                            "Homo_sapiens.GRCh37.75.gtf.chr.pcgene.promoters.bed")
+binfeature_file <- file.path(PROJHOME,  "results/features/promoter/bins-around-promoter.bed")
+```
+
+## Preface
+
+- 3 trillion base pairs (bp) in human genome
+- dividing the genome into 200 bp bins produces 15 million bins
+- 15 million features is a lot
+- thus will focus on the bins around promoters of protein coding genes
+
+## Identify features
+
+```{r load-pcgenes}
+gr <-
+  import.gff(gene_file) %>%
+  keepStandardChromosomes()
+
+gr.promoters <-
+  promoters(gr, upstream = 0, downstream = 1)
+
+# save data
+data.frame(
+  chr = seqnames(gr.promoters),
+  start = start(gr.promoters),
+  end = end(gr.promoters)
+  #gene_id = mcols(gr.promoters)$gene_id
+  ) %>%
+  tbl_df() %>%
+  readr::write_tsv(promoter_file, col_names = FALSE)
+```
+
+- Protein coding genes are loaded from `r basename(gene_file)`
+- `r length(gr.promoters)` protein coding genes on the standard chromosome
+
+```{r cmd-identify-features, results='asis'}
+# The 11 bins around a TSS
+cat("```\n",
+    sprintf("bedtools window -a %s -b %s -w 1000 | cut -f4-6 | sort | uniq | bedtools sort -i - > %s",
+            promoter_file, bin_file, binfeature_file),
+    "\n```")
+```
+
+```{r count-features}
+num_features <- NULL
+if (file.exists(binfeature_file)) {
+  num_features <-
+    rtracklayer::import.bed(binfeature_file) %>%
+    length()
+}
+```
+
+- `r num_features` unique bins (features) span the 11 bins around the
+  `r length(gr.promoters)` promoters
+
+## Extract features (example)
+
+```{r extract-features-example-files}
+finder_file <- "/projects/edcc_new/reference_epigenomes/CEMT_19/bams/ChIP-Seq/H3K4me3/FindER.1.0.0b/A33074.H3K4me3.merge_bwa.hg19a.A33074_2_lanes_dupsFlagged.v.A33079.Input.FDR_0.05.FindER.bed.gz"
+samplefeature_file <- "/projects/csiu_prj_results/PROJECTS/predictTissue/results/features/promoter/test-sample.EF.bed"
+sample_file <- "CEMT_19"
+```
+
+```{r cmd-extract-features, results='asis'}
+cmd_extract_features <-
+      sprintf("bedtools intersect -a %s -b %s -c",
+              binfeature_file, finder_file)
+cmd_parser <-
+  sprintf("awk -F'\\t' -v sample_id='%s' 'BEGIN{print sample_id} {print $NF}'",
+          sample_file)
+cmd_writeout <-
+  sprintf("> %s", samplefeature_file)
+
+cat("```\n",
+    paste(cmd_extract_features, "|", cmd_parser, cmd_writeout),
+    "\n```")
+```
+
+Then can combine features with `paste file1 file2 file3`
