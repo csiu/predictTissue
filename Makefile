@@ -17,7 +17,7 @@ features_bed := $(feature_dir)features.bed
 feature_matrix := $(PROJDIR)results/features/promoter/input.txt
 all: $(feature_matrix)
 
-# Ensure enrichment files are there
+# Ensure enrichment files are there, a hack (FIXME)
 $(finder_dir)%.bed.gz: $(finder_list)
 	perl -pe 's%^(.*)(CEMT_\d+)(.*)$$%[[ -L $(finder_dir)$$2.bed.gz ]] || ln -s $$1$$2$$3 $(finder_dir)$$2.bed.gz%' $< | sh
 
@@ -30,10 +30,11 @@ $(features_bed): $(bin_file) $(tss_bed)
 # Extract features
 $(ef_dir)%.ef: $(finder_dir)%.bed.gz $(features_bed)
 	bedtools intersect -a $(features_bed) -b $< -c \
-		| awk -F'\t' -v sample_id='$*' 'BEGIN{print sample_id} {print $NF}' \
+		| awk -F'\t' -v sample_id='$*' 'BEGIN{print sample_id} {print $$NF}' \
 		> $@
 
 # Join
 CEMT_samples := $(shell perl -pe 's/^.*(CEMT_\d+).*/$$1/' $(finder_list))
 $(feature_matrix): $(addprefix $(ef_dir), $(addsuffix .ef, $(CEMT_samples)))
-	paste $^ > $@
+	paste -d',' $^ \
+	| sed '2,$$s|2|1|g' > $@
