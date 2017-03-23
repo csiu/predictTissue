@@ -15,8 +15,8 @@ bin_file <- file.path(PROJHOME, "reference/hg19.200bpbins.bed.srt")
 
 features_dir <- file.path(PROJHOME, "results/features/promoter/_features")
 
-promoter_file <- file.path(features_dir, "HS.GRCh37.75.gtf.chr.pcgene.tss.bed")
-binfeature_file <- file.path(features_dir,  "features.bed")
+tss_bed <- file.path(features_dir, "HS.GRCh37.75.gtf.chr.pcgene.tss.bed")
+features_bed <- file.path(features_dir,  "features.bed")
 ```
 
 ## Preface
@@ -44,7 +44,7 @@ data.frame(
   #gene_id = mcols(gr.promoters)$gene_id
   ) %>%
   tbl_df() %>%
-  readr::write_tsv(promoter_file, col_names = FALSE)
+  readr::write_tsv(tss_bed, col_names = FALSE)
 ```
 
 - Protein coding genes are loaded from `r basename(gene_file)`
@@ -54,15 +54,15 @@ data.frame(
 # The 11 bins around a TSS
 cat("```\n",
     sprintf("bedtools window -a %s -b %s -w 1000 | cut -f4-6 | sort | uniq | bedtools sort -i - > %s",
-            promoter_file, bin_file, binfeature_file),
+            tss_bed, bin_file, features_bed),
     "\n```")
 ```
 
 ```{r count-features}
 num_features <- NULL
-if (file.exists(binfeature_file)) {
+if (file.exists(features_bed)) {
   num_features <-
-    rtracklayer::import.bed(binfeature_file) %>%
+    rtracklayer::import.bed(features_bed) %>%
     length()
 }
 ```
@@ -76,14 +76,14 @@ if (file.exists(binfeature_file)) {
 finder_file <- "/projects/edcc_new/reference_epigenomes/CEMT_19/bams/ChIP-Seq/H3K4me3/FindER.1.0.0b/A33074.H3K4me3.merge_bwa.hg19a.A33074_2_lanes_dupsFlagged.v.A33079.Input.FDR_0.05.FindER.bed.gz"
 samplefeature_file <- file.path(features_dir, "extractFeatures_samples",
                                 "test-sample.EF.bed")
-                                
-sample_file <- "CEMT_19"
+
+sample_file <- "test"
 ```
 
 ```{r cmd-extract-features, results='asis'}
 cmd_extract_features <-
       sprintf("bedtools intersect -a %s -b %s -c",
-              binfeature_file, finder_file)
+              features_bed, finder_file)
 cmd_parser <-
   sprintf("awk -F'\\t' -v sample_id='%s' 'BEGIN{print sample_id} {print $NF}'",
           sample_file)
@@ -95,4 +95,5 @@ cat("```\n",
     "\n```")
 ```
 
-Then can combine features with `paste file1 file2 file3`
+Then can combine features with `paste -d',' file1 file2 file3 | sed '2,$$s|2|1|g'`.
+The sed is to replace bins which overlap 2 peaks (value=2) with a value of 1.
