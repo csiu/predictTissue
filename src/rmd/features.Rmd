@@ -70,7 +70,7 @@ if (file.exists(features_bed)) {
 - `r num_features` unique bins (features) span the 11 bins around the
   `r length(gr.promoters)` promoters
 
-## Extract features (example)
+## Extract features from each sample (example)
 
 ```{r extract-features-example-files}
 finder_file <- "/projects/edcc_new/reference_epigenomes/CEMT_19/bams/ChIP-Seq/H3K4me3/FindER.1.0.0b/A33074.H3K4me3.merge_bwa.hg19a.A33074_2_lanes_dupsFlagged.v.A33079.Input.FDR_0.05.FindER.bed.gz"
@@ -94,6 +94,8 @@ cat("```\n",
     paste(cmd_extract_features, "|", cmd_parser, cmd_writeout),
     "\n```")
 ```
+
+## Combine features (example)
 
 Then can combine features with `paste -d',' file1 file2 file3 | sed '2,$$s|2|1|g'`.
 The sed is to replace bins which overlap 2 peaks (value=2) with a value of 1.
