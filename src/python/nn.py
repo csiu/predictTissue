@@ -10,12 +10,16 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
 # Define parser
-parser = argparse.ArgumentParser(description="")
-parser.add_argument('-m', '--mode', choices=['inspect', 'predict'],
-                    default='inspect')
-parser.add_argument('-i', '--indir', default="testdata")
+def getargs():
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument('-m', '--mode', choices=['inspect', 'predict'],
+                        default='inspect')
+    parser.add_argument('-i', '--indir', default="testdata")
 
-args = parser.parse_args()
+    args = parser.parse_args()
+    return args
+
+args = getargs()
 
 # Prep input
 if args.mode == 'inspect':
