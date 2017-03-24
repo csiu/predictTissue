@@ -12,18 +12,16 @@ from sklearn import metrics
 # Define parser
 def getargs():
     parser = argparse.ArgumentParser(description="")
-    subparsers = parser.add_subparsers(dest='subcommand')
 
     parser.add_argument('-i', '--indir', default="testdata")
-
-    #Subparser for training
-    parser_train = subparsers.add_parser('train')
-    parser_train.add_argument('-l', '--learn', type=float, default=0.001,
-                        help='Learning rate')
-    parser_train.add_argument('-n', '--hidden', type=int, required=True,
+    parser.add_argument('-n', '--hidden', type=int, required=True,
                         help='Number of hidden nodes')
-    parser_train.add_argument('-e', '--epochs', type=int, default=1000,
+    parser.add_argument('-e', '--epochs', type=int, default=1000,
                         help='Number of validation epochs (iterations)')
+    parser.add_argument('-l', '--learn', type=float, default=0.001,
+                        help='Learning rate')
+
+    parser.add_argument('mode', choices=['train', 'test'])
     
     args = parser.parse_args()
     return args
@@ -31,7 +29,7 @@ def getargs():
 args = getargs()
 
 # Prep input
-if(args.subcommand == 'train'):
+if(args.mode == 'train'):
     df = pd.read_csv(os.path.join(args.indir, "train.csv"))
     df_X = df.iloc[:,1:]
     df_y = df.iloc[:,0]
@@ -70,7 +68,7 @@ get_output = theano.function([l_in.input_var], net_output)
 for n in range(N_EPOCHS):
     print(n, train(X, y))
 
-if(args.subcommand == 'train'):
+if(args.mode == 'train'):
     # Evaluation on training data & validation data
     y_predicted = np.argmax(get_output(X), axis=1)
     print(metrics.accuracy_score(y, y_predicted))
