@@ -16,10 +16,18 @@ def getargs():
                         default='inspect')
     parser.add_argument('-i', '--indir', default="testdata")
 
+    parser.add_argument('-l', '--learn', type=float, default=0.001,
+                        help='Learning rate')
+    parser.add_argument('-n', '--hidden', type=int, required=True,
+                        help='Number of hidden nodes')
+    parser.add_argument('-e', '--epochs', type=int, default=1000,
+                        help='Number of validation epochs (iterations)')
+
     args = parser.parse_args()
     return args
 
 args = getargs()
+
 
 # Prep input
 if args.mode == 'inspect':
@@ -35,9 +43,9 @@ else:
 
 # Define variables
 N_CLASSES = len(y.unique())
-N_UNITS = int((X.shape[1] + N_CLASSES)/2)
-N_EPOCHS = 1000
-LEARNING_RATE = 0.001
+N_UNITS = args.hidden
+N_EPOCHS = args.epochs
+LEARNING_RATE = args.learn
 
 # Define layer structure
 l_in = lasagne.layers.InputLayer(shape=X.shape)
