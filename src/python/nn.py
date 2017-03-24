@@ -28,6 +28,44 @@ def getargs():
 
 args = getargs()
 
+class BasicMLP:
+    def __init__(self, X, N_UNITS, N_CLASSES, LEARNING_RATE, N_EPOCHS):
+        self.shape = X.shape
+        self.num_units = N_UNITS
+        self.num_classes = N_CLASSES
+        self.learning_rate = LEARNING_RATE
+        self.n_epochs = N_EPOCHS
+
+    def get_output(self):
+        # Define layer structure
+        l_in = lasagne.layers.InputLayer(shape=self.shape)
+        l_hidden = lasagne.layers.DenseLayer(
+                l_in, num_units=self.num_units,
+                nonlinearity=lasagne.nonlinearities.sigmoid)
+        l_output = lasagne.layers.DenseLayer(
+                l_hidden, num_units=self.num_classes,
+                nonlinearity=lasagne.nonlinearities.softmax)
+        net_output = lasagne.layers.get_output(l_output)
+
+        # Define objective
+        true_output = T.ivector('true_output')
+        loss = T.mean(lasagne.objectives.categorical_crossentropy(
+                net_output, true_output))
+
+        # Define update
+        all_params = lasagne.layers.get_all_params(l_output)
+        updates = lasagne.updates.adam(loss, all_params,
+                                       learning_rate=self.learning_rate)
+        train = theano.function([l_in.input_var, true_output], loss,
+                                updates=updates)
+        get_output = theano.function([l_in.input_var], net_output)
+
+        # Train for N_EPOCHS
+        for n in range(self.n_epochs):
+            print(n, train(X, y))
+
+        return(get_output)
+
 # Prep input
 if(args.mode == 'train'):
     df = pd.read_csv(os.path.join(args.indir, "train.csv"))
@@ -46,27 +84,8 @@ N_UNITS = args.hidden
 N_EPOCHS = args.epochs
 LEARNING_RATE = args.learn
 
-# Define layer structure
-l_in = lasagne.layers.InputLayer(shape=X.shape)
-l_hidden = lasagne.layers.DenseLayer(
-    l_in, num_units=N_UNITS, nonlinearity=lasagne.nonlinearities.sigmoid)
-l_output = lasagne.layers.DenseLayer(
-    l_hidden, num_units=N_CLASSES, nonlinearity=lasagne.nonlinearities.softmax)
-net_output = lasagne.layers.get_output(l_output)
-
-# Define objective
-true_output = T.ivector('true_output')
-loss = T.mean(lasagne.objectives.categorical_crossentropy(net_output, true_output))
-
-# Define update
-all_params = lasagne.layers.get_all_params(l_output)
-updates = lasagne.updates.adam(loss, all_params, learning_rate=LEARNING_RATE)
-train = theano.function([l_in.input_var, true_output], loss, updates=updates)
-get_output = theano.function([l_in.input_var], net_output)
-
-# Train for N_EPOCHS
-for n in range(N_EPOCHS):
-    print(n, train(X, y))
+bmlp = BasicMLP(X, N_UNITS, N_CLASSES, LEARNING_RATE, N_EPOCHS)
+get_output = bmlp.get_output()
 
 if(args.mode == 'train'):
     # Evaluation on training data & validation data
