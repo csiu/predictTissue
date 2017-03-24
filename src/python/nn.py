@@ -9,7 +9,6 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
-# Define parser
 def getargs():
     parser = argparse.ArgumentParser(description="")
 
@@ -26,45 +25,42 @@ def getargs():
     args = parser.parse_args()
     return args
 
-args = getargs()
-
 class BasicMLP:
-    def __init__(self, X, N_UNITS, N_CLASSES, LEARNING_RATE, N_EPOCHS):
+    def __init__(self, X):
         self.shape = X.shape
-        self.num_units = N_UNITS
-        self.num_classes = N_CLASSES
-        self.learning_rate = LEARNING_RATE
-        self.n_epochs = N_EPOCHS
 
-    def get_output(self):
+    def network(self, num_units, num_classes, learning_rate):
         # Define layer structure
-        l_in = lasagne.layers.InputLayer(shape=self.shape)
+        self.l_in = lasagne.layers.InputLayer(shape=self.shape)
         l_hidden = lasagne.layers.DenseLayer(
-                l_in, num_units=self.num_units,
+                self.l_in, num_units=num_units,
                 nonlinearity=lasagne.nonlinearities.sigmoid)
         l_output = lasagne.layers.DenseLayer(
-                l_hidden, num_units=self.num_classes,
+                l_hidden, num_units=num_classes,
                 nonlinearity=lasagne.nonlinearities.softmax)
-        net_output = lasagne.layers.get_output(l_output)
+        self.net_output = lasagne.layers.get_output(l_output)
 
         # Define objective
         true_output = T.ivector('true_output')
         loss = T.mean(lasagne.objectives.categorical_crossentropy(
-                net_output, true_output))
+                self.net_output, true_output))
 
         # Define update
         all_params = lasagne.layers.get_all_params(l_output)
         updates = lasagne.updates.adam(loss, all_params,
-                                       learning_rate=self.learning_rate)
-        train = theano.function([l_in.input_var, true_output], loss,
-                                updates=updates)
-        get_output = theano.function([l_in.input_var], net_output)
+                                       learning_rate=learning_rate)
+        self.train = theano.function([self.l_in.input_var, true_output], loss,
+                                     updates=updates)
 
-        # Train for N_EPOCHS
-        for n in range(self.n_epochs):
-            print(n, train(X, y))
+    def train_network(self, n_epochs):
+        for n in range(n_epochs):
+            print(n, self.train(X, y))
 
+    def get_output(self):
+        get_output = theano.function([self.l_in.input_var], self.net_output)
         return(get_output)
+
+args = getargs()
 
 # Prep input
 if(args.mode == 'train'):
@@ -84,7 +80,9 @@ N_UNITS = args.hidden
 N_EPOCHS = args.epochs
 LEARNING_RATE = args.learn
 
-bmlp = BasicMLP(X, N_UNITS, N_CLASSES, LEARNING_RATE, N_EPOCHS)
+bmlp = BasicMLP(X)
+bmlp.network(N_UNITS, N_CLASSES, LEARNING_RATE)
+bmlp.train_network(N_EPOCHS)
 get_output = bmlp.get_output()
 
 if(args.mode == 'train'):
