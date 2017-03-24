@@ -59,9 +59,9 @@ class BasicMLP:
         for n in range(n_epochs):
             print(n, self.train(self.X, self.y))
 
-    def get_output(self):
+    def get_output(self, X2):
         get_output = theano.function([self.l_in.input_var], self.net_output)
-        return(get_output)
+        return(get_output(X2))
 
 args = getargs()
 
@@ -85,18 +85,17 @@ LEARNING_RATE = args.learn
 bmlp = BasicMLP(X, y)
 bmlp.network(N_UNITS, LEARNING_RATE)
 bmlp.train_network(N_EPOCHS)
-get_output = bmlp.get_output()
 
 if(args.mode == 'train'):
     # Evaluation on training data & validation data
-    y_predicted = np.argmax(get_output(X), axis=1)
+    y_predicted = np.argmax(bmlp.get_output(X), axis=1)
     print(metrics.accuracy_score(y, y_predicted))
-    print(metrics.accuracy_score(y_test, np.argmax(get_output(X_test), axis=1)))
+    print(metrics.accuracy_score(y_test, np.argmax(bmlp.get_output(X_test), axis=1)))
 else:
     OUTFILE = "day27-node{}-learn{}-epoch{}.csv".format(
             N_UNITS, LEARNING_RATE, N_EPOCHS)
     # Make predictions using trained model
-    y_new = np.argmax(get_output(X_new), axis=1)
+    y_new = np.argmax(bmlp.get_output(X_new), axis=1)
     y_new = pd.DataFrame(y_new, columns=['Label'])
     y_new.insert(0, 'ImageId', range(1, len(y_new)+1))
     y_new.to_csv(OUTFILE, index=False)
