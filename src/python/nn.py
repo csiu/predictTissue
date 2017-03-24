@@ -26,17 +26,20 @@ def getargs():
     return args
 
 class BasicMLP:
-    def __init__(self, X):
+    def __init__(self, X, y):
+        self.X = X
+        self.y = y
         self.shape = X.shape
+        self.num_classes = len(y.unique())
 
-    def network(self, num_units, num_classes, learning_rate):
+    def network(self, num_units, learning_rate):
         # Define layer structure
         self.l_in = lasagne.layers.InputLayer(shape=self.shape)
         l_hidden = lasagne.layers.DenseLayer(
                 self.l_in, num_units=num_units,
                 nonlinearity=lasagne.nonlinearities.sigmoid)
         l_output = lasagne.layers.DenseLayer(
-                l_hidden, num_units=num_classes,
+                l_hidden, num_units=self.num_classes,
                 nonlinearity=lasagne.nonlinearities.softmax)
         self.net_output = lasagne.layers.get_output(l_output)
 
@@ -54,7 +57,7 @@ class BasicMLP:
 
     def train_network(self, n_epochs):
         for n in range(n_epochs):
-            print(n, self.train(X, y))
+            print(n, self.train(self.X, self.y))
 
     def get_output(self):
         get_output = theano.function([self.l_in.input_var], self.net_output)
@@ -75,13 +78,12 @@ else:
     X_new = pd.read_csv(os.path.join(args.indir, "test.csv"))
 
 # Define variables
-N_CLASSES = len(y.unique())
 N_UNITS = args.hidden
 N_EPOCHS = args.epochs
 LEARNING_RATE = args.learn
 
-bmlp = BasicMLP(X)
-bmlp.network(N_UNITS, N_CLASSES, LEARNING_RATE)
+bmlp = BasicMLP(X, y)
+bmlp.network(N_UNITS, LEARNING_RATE)
 bmlp.train_network(N_EPOCHS)
 get_output = bmlp.get_output()
 
