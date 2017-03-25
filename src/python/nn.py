@@ -67,6 +67,15 @@ class BasicMLP:
 
 
 class LoadCustomTissueInput():
+    """
+    To load (X, y) from custom input_file and class_file.
+    
+    input_file is a CSV file with samples as columns and features as rows.
+    There are column names (ie. sample_ids) but no feature/row names.
+    
+    class_file is a TSV file mapping sample_ids of the input_file (column 1) to
+    the tissue labels (column 2). 
+    """
     def __init__(self, input_file, class_file):
         self.input_file = input_file
         self.class_file = class_file
