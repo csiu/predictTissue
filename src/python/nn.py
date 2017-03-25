@@ -152,9 +152,9 @@ if __name__ == '__main__':
     bmlp.network(N_UNITS, LEARNING_RATE)
     bmlp.train_network(N_EPOCHS)
 
+    # Evaluation
+    print(metrics.accuracy_score(y, bmlp.get_output(X)))
     if(args.mode == 'train'):
-        # Evaluation on training data & validation data
-        print(metrics.accuracy_score(y, bmlp.get_output(X)))
         print(metrics.accuracy_score(y_test, bmlp.get_output(X_test)))
     else:
         # Make predictions using trained model
