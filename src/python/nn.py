@@ -151,5 +151,5 @@ if __name__ == '__main__':
     else:
         # Make predictions using trained model
         OUTFILE = "day27-node{}-learn{}-epoch{}.csv".format(
-        N_UNITS, LEARNING_RATE, N_EPOCHS)
-        td.write_submission(y_predicted=bmlp.get_output(X_new), OUTFILE)
+                N_UNITS, LEARNING_RATE, N_EPOCHS)
+        td.write_submission(bmlp.get_output(X_new), OUTFILE)
