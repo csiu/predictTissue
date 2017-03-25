@@ -14,6 +14,7 @@ sample_meta <- file.path(PROJHOME, "metadata/CEMT_EDCC_status.txt")
 
 # Output file
 out_finder <- file.path(PROJHOME, "metadata/listoffiles.h3k4me3.finder.txt")
+out_class <- file.path(PROJHOME, "metadata/mapping.tissueclass.txt")
 ```
 
 ## Samples with H3K4me3 enrichment calls
@@ -152,3 +153,8 @@ db_for_analysis %>%
   DT::datatable(filter = "top")
 ```
 
+```{r save-sample-class}
+db_for_analysis %>%
+  select(sample, label=tissue2) %>%
+  readr::write_tsv(out_class)
+```
