@@ -154,8 +154,7 @@ if __name__ == '__main__':
 
     if(args.mode == 'train'):
         # Evaluation on training data & validation data
-        y_predicted = bmlp.get_output(X)
-        print(metrics.accuracy_score(y, y_predicted))
+        print(metrics.accuracy_score(y, bmlp.get_output(X)))
         print(metrics.accuracy_score(y_test, bmlp.get_output(X_test)))
     else:
         # Make predictions using trained model
