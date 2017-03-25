@@ -59,9 +59,11 @@ class BasicMLP:
         for n in range(n_epochs):
             print(n, self.train(self.X, self.y))
 
-    def get_output(self, X2):
+    def get_output(self, X2, do_argmax=True):
         get_output = theano.function([self.l_in.input_var], self.net_output)
-        return(get_output(X2))
+        y_predicted = get_output(X2)
+        if do_argmax: y_predicted = np.argmax(y_predicted, axis=1)
+        return(y_predicted)
 
 
 class LoadCustomTissueInput():
@@ -113,8 +115,7 @@ class ToyData():
         return(X, y, X_new)
 
     def write_submission(self, y_predicted, out_file):
-        y_new = np.argmax(y_predicted, axis=1)
-        y_new = pd.DataFrame(y_new, columns=['Label'])
+        y_new = pd.DataFrame(y_predicted, columns=['Label'])
         y_new.insert(0, 'ImageId', range(1, len(y_new)+1))
         y_new.to_csv(out_file, index=False)
 
@@ -144,9 +145,9 @@ if __name__ == '__main__':
 
     if(args.mode == 'train'):
         # Evaluation on training data & validation data
-        y_predicted = np.argmax(bmlp.get_output(X), axis=1)
+        y_predicted = bmlp.get_output(X)
         print(metrics.accuracy_score(y, y_predicted))
-        print(metrics.accuracy_score(y_test, np.argmax(bmlp.get_output(X_test), axis=1)))
+        print(metrics.accuracy_score(y_test, bmlp.get_output(X_test)))
     else:
         # Make predictions using trained model
         OUTFILE = "day27-node{}-learn{}-epoch{}.csv".format(
