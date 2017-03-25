@@ -63,6 +63,31 @@ class BasicMLP:
         get_output = theano.function([self.l_in.input_var], self.net_output)
         return(get_output(X2))
 
+
+class LoadCustomTissueInput():
+    def __init__(self, input_file, class_file):
+        self.input_file = input_file
+        self.class_file = class_file
+
+    def _load_x(self, do_transpose=True):
+        self.X = pd.read_csv(self.input_file, index_col=False)
+        if do_transpose: self.X = self.X.transpose()
+        return(self.X)
+
+    def _load_y(self):
+        df = pd.read_table(self.class_file)
+        class_lookup = pd.Series(df['label'].values, index=df['sample']).to_dict()
+        y = pd.Series([class_lookup[s] for s in self.X.index])
+        return(y)
+
+    def load_data(self):
+        # Class label needs to be numerical
+        class_mapping = {
+                'Blood':0,'Brain':1, 'Breast':2, 'Colon':3, 'Thyroid':4}
+        X = self._load_x().reset_index(drop=True)
+        y = self._load_y().map(class_mapping)
+        return(X, y)
+
 args = getargs()
 
 # Prep input
@@ -70,6 +95,12 @@ if(args.mode == 'train'):
     df = pd.read_csv(os.path.join(args.indir, "train.csv"))
     df_X = df.iloc[:,1:]
     df_y = df.iloc[:,0]
+
+    #proj_dir = "/projects/csiu_prj_results/PROJECTS/predictTissue"
+    #input_file = os.path.join("results/features/promoter/input.txt")
+    #class_file = os.path.join("metadata/tissueclass.txt")
+    #df_X, df_y = LoadCustomTissueInput(input_file, class_file).load_data()
+
     X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
 else: 
     df = pd.read_csv(os.path.join(args.indir, "train.csv"))
