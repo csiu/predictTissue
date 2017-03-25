@@ -21,7 +21,7 @@ def getargs():
                         help='Learning rate')
 
     parser.add_argument('mode', choices=['train', 'test'])
-    
+
     args = parser.parse_args()
     return args
 
@@ -96,30 +96,31 @@ class LoadToyInput():
         df = pd.read_csv(os.path.join(self.datadir, "train.csv"))
         X = df.iloc[:,1:]
         y = df.iloc[:,0]
-        return(X, y)    
-    
+        return(X, y)
+
     def load_train(self):
         df_X, df_y = self._load_train()
         X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
         return(X, X_test, y, y_test)
-    
+
     def load_test(self):
         X, y = self._load_train()
         X_new = pd.read_csv(os.path.join(self.datadir, "test.csv"))
         return(X, y, X_new)
 
-    
+
 args = getargs()
 
 # Prep input
 if(args.mode == 'train'):
     X, X_test, y, y_test = LoadToyInput(args.indir).load_train()
+
     #proj_dir = "/projects/csiu_prj_results/PROJECTS/predictTissue"
     #input_file = os.path.join("results/features/promoter/input.txt")
     #class_file = os.path.join("metadata/tissueclass.txt")
     #df_X, df_y = LoadCustomTissueInput(input_file, class_file).load_data()
     #X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
-else: 
+else:
     X, y, X_new = LoadToyInput(args.indir).load_test()
 
 # Define variables
