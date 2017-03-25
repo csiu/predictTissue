@@ -13,6 +13,8 @@ def getargs():
     parser = argparse.ArgumentParser(description="")
 
     parser.add_argument('-i', '--indir', default="testdata")
+    parser.add_argument('-o', '--outprefix', default="out")
+    
     parser.add_argument('-n', '--hidden', type=int, required=True,
                         help='Number of hidden nodes')
     parser.add_argument('-e', '--epochs', type=int, default=1000,
@@ -134,6 +136,7 @@ if __name__ == '__main__':
     N_UNITS = args.hidden
     N_EPOCHS = args.epochs
     LEARNING_RATE = args.learn
+    OUT_PREFIX = args.outprefix
 
     # Prep input
     td = ToyData(args.indir)
@@ -158,6 +161,6 @@ if __name__ == '__main__':
         print(metrics.accuracy_score(y_test, bmlp.get_output(X_test)))
     else:
         # Make predictions using trained model
-        OUTFILE = "day27-node{}-learn{}-epoch{}.csv".format(
-                N_UNITS, LEARNING_RATE, N_EPOCHS)
-        td.write_submission(bmlp.get_output(X_new), OUTFILE)
+        out_file = "{}-node{}-learn{}-epoch{}.csv".format(
+                OUT_PREFIX, N_UNITS, LEARNING_RATE, N_EPOCHS)
+        td.write_submission(bmlp.get_output(X_new), out_file)
