@@ -88,7 +88,11 @@ class LoadCustomTissueInput():
         y = self._load_y().map(class_mapping)
         return(X, y)
 
-class LoadToyInput():
+class ToyData():
+    """
+    Load Kaggle Digit Recognizer MNIST data from datadir &
+    write predictions in the Kaggle submission format
+    """
     def __init__(self, datadir):
         self.datadir = datadir
 
@@ -107,13 +111,20 @@ class LoadToyInput():
         X, y = self._load_train()
         X_new = pd.read_csv(os.path.join(self.datadir, "test.csv"))
         return(X, y, X_new)
+    
+    def write_submission(self, y_predicted, out_file):
+        y_new = np.argmax(y_predicted, axis=1)
+        y_new = pd.DataFrame(y_new, columns=['Label'])
+        y_new.insert(0, 'ImageId', range(1, len(y_new)+1))
+        y_new.to_csv(out_file, index=False)
 
 
 args = getargs()
 
 # Prep input
+td = ToyData(args.indir)
 if(args.mode == 'train'):
-    X, X_test, y, y_test = LoadToyInput(args.indir).load_train()
+    X, X_test, y, y_test = td.load_train()
 
     #proj_dir = "/projects/csiu_prj_results/PROJECTS/predictTissue"
     #input_file = os.path.join("results/features/promoter/input.txt")
@@ -121,12 +132,11 @@ if(args.mode == 'train'):
     #df_X, df_y = LoadCustomTissueInput(input_file, class_file).load_data()
     #X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
 else:
-    X, y, X_new = LoadToyInput(args.indir).load_test()
-
 # Define variables
 N_UNITS = args.hidden
 N_EPOCHS = args.epochs
 LEARNING_RATE = args.learn
+    X, y, X_new = td.load_test()
 
 bmlp = BasicMLP(X, y)
 bmlp.network(N_UNITS, LEARNING_RATE)
@@ -138,10 +148,7 @@ if(args.mode == 'train'):
     print(metrics.accuracy_score(y, y_predicted))
     print(metrics.accuracy_score(y_test, np.argmax(bmlp.get_output(X_test), axis=1)))
 else:
-    OUTFILE = "day27-node{}-learn{}-epoch{}.csv".format(
-            N_UNITS, LEARNING_RATE, N_EPOCHS)
     # Make predictions using trained model
-    y_new = np.argmax(bmlp.get_output(X_new), axis=1)
-    y_new = pd.DataFrame(y_new, columns=['Label'])
-    y_new.insert(0, 'ImageId', range(1, len(y_new)+1))
-    y_new.to_csv(OUTFILE, index=False)
+    OUTFILE = "day27-node{}-learn{}-epoch{}.csv".format(
+    N_UNITS, LEARNING_RATE, N_EPOCHS)
+    td.write_submission(y_predicted=bmlp.get_output(X_new), OUTFILE)
