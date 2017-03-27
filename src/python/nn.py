@@ -32,7 +32,7 @@ def getargs():
 
     parser.add_argument('-i', '--indir', default="testdata")
     parser.add_argument('-o', '--outprefix', default="out")
-    
+
     parser.add_argument('-n', '--hidden', type=int, required=True,
                         help='Number of hidden nodes')
     parser.add_argument('-e', '--epochs', type=int, default=1000,
@@ -88,16 +88,15 @@ class BasicMLP:
         if do_argmax: y_predicted = np.argmax(y_predicted, axis=1)
         return(y_predicted)
 
-
 class LoadCustomTissueInput():
     """
     To load (X, y) from custom input_file and class_file.
-    
+
     input_file is a CSV file with samples as columns and features as rows.
     There are column names (ie. sample_ids) but no feature/row names.
-    
+
     class_file is a TSV file mapping sample_ids of the input_file (column 1) to
-    the tissue labels (column 2). 
+    the tissue labels (column 2).
     """
     def __init__(self, input_file, class_file):
         self.input_file = input_file
@@ -171,6 +170,7 @@ if __name__ == '__main__':
         #X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
     else:
         X, y, X_new = td.load_test()
+
 
     bmlp = BasicMLP(X, y)
     bmlp.network(N_UNITS, LEARNING_RATE)
