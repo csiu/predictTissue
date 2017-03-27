@@ -187,8 +187,8 @@ if __name__ == '__main__':
         X, X_test, y, y_test = td.load_train()
 
         #proj_dir = "/projects/csiu_prj_results/PROJECTS/predictTissue"
-        #input_file = os.path.join("results/features/promoter/input.txt")
-        #class_file = os.path.join("metadata/tissueclass.txt")
+        #input_file = os.path.join(proj_dir, "results/features/promoter/input.txt")
+        #class_file = os.path.join(proj_dir, "metadata/tissueclass.txt")
         #df_X, df_y = LoadCustomTissueInput(input_file, class_file).load_data()
         #X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
     else:
