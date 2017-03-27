@@ -125,6 +125,29 @@ def build_mlp(shape, num_classes, num_units):
 
     return(l_output, l_in.input_var)
 
+def build_cnn1d(shape, n_classes, num_filters, filter_size, pool_size):
+    l_in = lasagne.layers.InputLayer(shape=shape)
+
+    # Convolutional layer
+    # (ReLU is the common nonlinearity in cnns)
+    l_conv = lasagne.layers.Conv1DLayer(
+            l_in, num_filters=num_filters, filter_size=filter_size,
+            nonlinearity=lasagne.nonlinearities.rectify)
+
+    # Pooling layer
+    l_pool = lasagne.layers.MaxPool1DLayer(
+            l_conv, pool_size=pool_size)
+
+    # (You can add more conv+pool layers)
+
+    # Output layer
+    l_output = lasagne.layers.DenseLayer(
+        l_pool, num_units=n_classes,
+        nonlinearity=lasagne.nonlinearities.softmax)
+
+    return(l_output, l_in.input_var)
+
+
 def reformat_input_matrix2convnet1d(X):
     """
     Reformat matrix shape (samples,features)
