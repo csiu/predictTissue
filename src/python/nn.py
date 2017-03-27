@@ -9,6 +9,24 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
+import cPickle as pickle
+
+class PickleModel:
+    def __init__(self, network, network_file):
+        self.network = network
+        self.network_file = network_file
+        
+    def save_model(self):
+        net_info = {'network': self.network,
+                   'params': lasagne.layers.get_all_param_values(self.network)}
+        pickle.dump(net_info, open(self.network_file, 'wb'),
+                    protocol=pickle.HIGHEST_PROTOCOL)
+
+    def load_model(self):
+        net = pickle.load(open(network_file, 'rb'))
+        all_params = net['params']
+        lasagne.layers.set_all_param_values(self.network, all_params) 
+
 def getargs():
     parser = argparse.ArgumentParser(description="")
 
