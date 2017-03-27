@@ -176,6 +176,7 @@ if __name__ == '__main__':
     N_EPOCHS = 10
     LEARNING_RATE = 0.01
     """
+    network_type = "cnn"
 
     if MODEL_FILE != None:
         MODEL_FILE = os.path.abspath(MODEL_FILE)
@@ -196,7 +197,18 @@ if __name__ == '__main__':
     # Prepare Theano variables for inputs and targets
     target_var = T.ivector('target_var')
 
-    network, input_var = build_mlp(shape=X.shape, num_classes=10, num_units=N_UNITS)
+    if network_type == "cnn":
+        X = reformat_input_matrix2convnet1d(X)
+        if(args.mode == 'train'):
+            X_test = reformat_input_matrix2convnet1d(X_test)
+        else:
+            X_new = reformat_input_matrix2convnet1d(X_test)
+
+        network, input_var = build_cnn1d(
+                shape=(None, 1, X.shape[2]), n_classes=5,
+                num_filters=100, filter_size=(11), pool_size=(3))
+    else:
+        network, input_var = build_mlp(shape=X.shape, num_classes=10, num_units=N_UNITS)
 
     # If model file exists, load params
     if MODEL_FILE != None and os.path.exists(MODEL_FILE):
