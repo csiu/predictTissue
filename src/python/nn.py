@@ -157,8 +157,7 @@ if __name__ == '__main__':
 
     # If model file exists, load params
     if MODEL_FILE != None and os.path.exists(MODEL_FILE):
-        pm = PickleModel(network, MODEL_FILE)
-        pm.load_model()
+        PickleModel(network, MODEL_FILE).load_model()
 
         net_output = lasagne.layers.get_output(network)
 
@@ -182,8 +181,7 @@ if __name__ == '__main__':
 
         # Save trained model
         if MODEL_FILE != None and os.path.exists(os.path.dirname(MODEL_FILE)):
-            pm = PickleModel(network, MODEL_FILE)
-            pm.save_model()
+            PickleModel(network, MODEL_FILE).save_model()
 
     # Predict
     get_output = theano.function([input_var], net_output)
