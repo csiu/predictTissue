@@ -48,46 +48,6 @@ def getargs():
     args = parser.parse_args()
     return args
 
-class BasicMLP:
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-        self.shape = X.shape
-        self.num_classes = len(y.unique())
-
-    def network(self, num_units, learning_rate):
-        # Define layer structure
-        self.l_in = lasagne.layers.InputLayer(shape=self.shape)
-        l_hidden = lasagne.layers.DenseLayer(
-                self.l_in, num_units=num_units,
-                nonlinearity=lasagne.nonlinearities.sigmoid)
-        l_output = lasagne.layers.DenseLayer(
-                l_hidden, num_units=self.num_classes,
-                nonlinearity=lasagne.nonlinearities.softmax)
-        self.net_output = lasagne.layers.get_output(l_output)
-
-        # Define objective
-        true_output = T.ivector('true_output')
-        loss = T.mean(lasagne.objectives.categorical_crossentropy(
-                self.net_output, true_output))
-
-        # Define update
-        all_params = lasagne.layers.get_all_params(l_output)
-        updates = lasagne.updates.adam(loss, all_params,
-                                       learning_rate=learning_rate)
-        self.train = theano.function([self.l_in.input_var, true_output], loss,
-                                     updates=updates)
-
-    def train_network(self, n_epochs):
-        for n in range(n_epochs):
-            print(n, self.train(self.X, self.y))
-
-    def get_output(self, X2, do_argmax=True):
-        get_output = theano.function([self.l_in.input_var], self.net_output)
-        y_predicted = get_output(X2)
-        if do_argmax: y_predicted = np.argmax(y_predicted, axis=1)
-        return(y_predicted)
-
 class LoadCustomTissueInput():
     """
     To load (X, y) from custom input_file and class_file.
@@ -150,6 +110,19 @@ class ToyData():
         y_new.insert(0, 'ImageId', range(1, len(y_new)+1))
         y_new.to_csv(out_file, index=False)
 
+def build_mlp(shape, num_units, num_classes):
+    l_in = lasagne.layers.InputLayer(shape=shape)
+
+    l_hidden = lasagne.layers.DenseLayer(
+            l_in, num_units=num_units,
+            nonlinearity=lasagne.nonlinearities.sigmoid)
+
+    l_output = lasagne.layers.DenseLayer(
+            l_hidden, num_units=num_classes,
+            nonlinearity=lasagne.nonlinearities.softmax)
+
+    return(l_output, l_in.input_var)
+
 if __name__ == '__main__':
     args = getargs()
 
@@ -171,17 +144,36 @@ if __name__ == '__main__':
     else:
         X, y, X_new = td.load_test()
 
+    # Prepare Theano variables for inputs and targets
+    target_var = T.ivector('target_var')
 
-    bmlp = BasicMLP(X, y)
-    bmlp.network(N_UNITS, LEARNING_RATE)
-    bmlp.train_network(N_EPOCHS)
+    network, input_var = build_mlp(shape=X.shape, num_units=N_UNITS, num_classes=10)
+
+    # Objective
+    net_output = lasagne.layers.get_output(network)
+    loss = T.mean(lasagne.objectives.categorical_crossentropy(
+            net_output, target_var))
+    # Update
+    all_params = lasagne.layers.get_all_params(network)
+    updates = lasagne.updates.adam(loss, all_params,
+                                   learning_rate=LEARNING_RATE)
+    # Train
+    train = theano.function([input_var, target_var], loss,
+                            updates=updates)
+
+    # Training
+    for n in range(N_EPOCHS):
+        print(n, train(X, y))
+
+    # Predict
+    get_output = theano.function([input_var], net_output)
 
     # Evaluation
-    print(metrics.accuracy_score(y, bmlp.get_output(X)))
+    print(metrics.accuracy_score(y, np.argmax(get_output(X), axis=1)))
     if(args.mode == 'train'):
-        print(metrics.accuracy_score(y_test, bmlp.get_output(X_test)))
+        print(metrics.accuracy_score(y_test, np.argmax(get_output(X_test), axis=1)))
     else:
         # Make predictions using trained model
         out_file = "{}-node{}-learn{}-epoch{}.csv".format(
                 OUT_PREFIX, N_UNITS, LEARNING_RATE, N_EPOCHS)
-        td.write_submission(bmlp.get_output(X_new), out_file)
+        td.write_submission(np.argmax(get_output(X_new), axis=1), out_file)
