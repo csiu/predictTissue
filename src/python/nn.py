@@ -125,6 +125,14 @@ def build_mlp(shape, num_classes, num_units):
 
     return(l_output, l_in.input_var)
 
+def reformat_input_matrix2convnet1d(X):
+    """
+    Reformat matrix shape (samples,features)
+    to nested input for 1d-cnn (samples,channel,features)
+    """
+    X = np.matrix(X, dtype=theano.config.floatX)
+    return(np.array([r for r in X]))
+
 if __name__ == '__main__':
     args = getargs()
 
