@@ -141,12 +141,19 @@ if __name__ == '__main__':
     LEARNING_RATE = args.learn
     OUT_PREFIX = args.outprefix
     MODEL_FILE = args.model
+    TOY_DATADIR = args.indir
+    """
+    # For testing
+    N_UNITS = 10
+    N_EPOCHS = 10
+    LEARNING_RATE = 0.01
+    """
 
     if MODEL_FILE != None:
         MODEL_FILE = os.path.abspath(MODEL_FILE)
 
     # Prep input
-    td = ToyData(args.indir)
+    td = ToyData(TOY_DATADIR)
     if(args.mode == 'train'):
         X, X_test, y, y_test = td.load_train()
 
