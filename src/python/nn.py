@@ -139,10 +139,15 @@ def build_cnn1d(shape, n_classes, num_filters, filter_size, pool_size):
             l_conv, pool_size=pool_size)
 
     # (You can add more conv+pool layers)
+    l_conv2 = lasagne.layers.Conv1DLayer(
+            l_pool, num_filters=num_filters, filter_size=filter_size,
+            nonlinearity=lasagne.nonlinearities.rectify)
+    l_pool2 = lasagne.layers.MaxPool1DLayer(
+            l_conv2, pool_size=pool_size)
 
     # Output layer
     l_output = lasagne.layers.DenseLayer(
-        l_pool, num_units=n_classes,
+        l_pool2, num_units=n_classes,
         nonlinearity=lasagne.nonlinearities.softmax)
 
     return(l_output, l_in.input_var)
