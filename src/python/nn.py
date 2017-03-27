@@ -112,7 +112,7 @@ class ToyData():
         y_new.insert(0, 'ImageId', range(1, len(y_new)+1))
         y_new.to_csv(out_file, index=False)
 
-def build_mlp(shape, num_units, num_classes):
+def build_mlp(shape, num_classes, num_units):
     l_in = lasagne.layers.InputLayer(shape=shape)
 
     l_hidden = lasagne.layers.DenseLayer(
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     # Prepare Theano variables for inputs and targets
     target_var = T.ivector('target_var')
 
-    network, input_var = build_mlp(shape=X.shape, num_units=N_UNITS, num_classes=10)
+    network, input_var = build_mlp(shape=X.shape, num_classes=10, num_units=N_UNITS)
 
     # If model file exists, load params
     if MODEL_FILE != None and os.path.exists(MODEL_FILE):
