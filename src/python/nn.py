@@ -16,13 +16,15 @@ class PickleModel:
         self.network = network
         self.model_file = model_file
 
-    def save_model(self):
+    def save_model(self, verbose=True):
+        if verbose: print("Saving model to: '%s'" % self.model_file)
         net_info = {'network': self.network,
                    'params': lasagne.layers.get_all_param_values(self.network)}
         pickle.dump(net_info, open(self.model_file, 'wb'),
                     protocol=pickle.HIGHEST_PROTOCOL)
 
-    def load_model(self):
+    def load_model(self, verbose=True):
+        if verbose: print("Loading model from: '%s'" % self.model_file)
         net = pickle.load(open(self.model_file, 'rb'))
         all_params = net['params']
         lasagne.layers.set_all_param_values(self.network, all_params)
@@ -130,6 +132,10 @@ if __name__ == '__main__':
     N_EPOCHS = args.epochs
     LEARNING_RATE = args.learn
     OUT_PREFIX = args.outprefix
+    MODEL_FILE = args.model
+
+    if MODEL_FILE != None:
+        MODEL_FILE = os.path.abspath(MODEL_FILE)
 
     # Prep input
     td = ToyData(args.indir)
@@ -149,21 +155,35 @@ if __name__ == '__main__':
 
     network, input_var = build_mlp(shape=X.shape, num_units=N_UNITS, num_classes=10)
 
-    # Objective
-    net_output = lasagne.layers.get_output(network)
-    loss = T.mean(lasagne.objectives.categorical_crossentropy(
-            net_output, target_var))
-    # Update
-    all_params = lasagne.layers.get_all_params(network)
-    updates = lasagne.updates.adam(loss, all_params,
-                                   learning_rate=LEARNING_RATE)
-    # Train
-    train = theano.function([input_var, target_var], loss,
-                            updates=updates)
+    # If model file exists, load params
+    if MODEL_FILE != None and os.path.exists(MODEL_FILE):
+        pm = PickleModel(network, MODEL_FILE)
+        pm.load_model()
 
-    # Training
-    for n in range(N_EPOCHS):
-        print(n, train(X, y))
+        net_output = lasagne.layers.get_output(network)
+
+    # else do training and then save file
+    else:
+        # Objective
+        net_output = lasagne.layers.get_output(network)
+        loss = T.mean(lasagne.objectives.categorical_crossentropy(
+                net_output, target_var))
+        # Update
+        all_params = lasagne.layers.get_all_params(network)
+        updates = lasagne.updates.adam(loss, all_params,
+                                       learning_rate=LEARNING_RATE)
+        # Train
+        train = theano.function([input_var, target_var], loss,
+                                updates=updates)
+
+        # Training
+        for n in range(N_EPOCHS):
+            print(n, train(X, y))
+
+        # Save trained model
+        if MODEL_FILE != None and os.path.exists(os.path.dirname(MODEL_FILE)):
+            pm = PickleModel(network, MODEL_FILE)
+            pm.save_model()
 
     # Predict
     get_output = theano.function([input_var], net_output)
