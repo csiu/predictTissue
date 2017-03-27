@@ -12,20 +12,20 @@ from sklearn import metrics
 import cPickle as pickle
 
 class PickleModel:
-    def __init__(self, network, network_file):
+    def __init__(self, network, model_file):
         self.network = network
-        self.network_file = network_file
-        
+        self.model_file = model_file
+
     def save_model(self):
         net_info = {'network': self.network,
                    'params': lasagne.layers.get_all_param_values(self.network)}
-        pickle.dump(net_info, open(self.network_file, 'wb'),
+        pickle.dump(net_info, open(self.model_file, 'wb'),
                     protocol=pickle.HIGHEST_PROTOCOL)
 
     def load_model(self):
-        net = pickle.load(open(network_file, 'rb'))
+        net = pickle.load(open(self.model_file, 'rb'))
         all_params = net['params']
-        lasagne.layers.set_all_param_values(self.network, all_params) 
+        lasagne.layers.set_all_param_values(self.network, all_params)
 
 def getargs():
     parser = argparse.ArgumentParser(description="")
@@ -39,6 +39,9 @@ def getargs():
                         help='Number of validation epochs (iterations)')
     parser.add_argument('-l', '--learn', type=float, default=0.001,
                         help='Learning rate')
+
+    parser.add_argument('-m', '--model',
+                        help='Model file')
 
     parser.add_argument('mode', choices=['train', 'test'])
 
