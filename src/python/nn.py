@@ -202,7 +202,7 @@ if __name__ == '__main__':
         if(args.mode == 'train'):
             X_test = reformat_input_matrix2convnet1d(X_test)
         else:
-            X_new = reformat_input_matrix2convnet1d(X_test)
+            X_new = reformat_input_matrix2convnet1d(X_new)
 
         network, input_var = build_cnn1d(
                 shape=(None, 1, X.shape[2]), n_classes=5,
