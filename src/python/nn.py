@@ -170,11 +170,13 @@ if __name__ == '__main__':
     OUT_PREFIX = args.outprefix
     MODEL_FILE = args.model
     TOY_DATADIR = args.indir
+    MODE = args.mode
     """
     # For testing
     N_UNITS = 10
     N_EPOCHS = 10
     LEARNING_RATE = 0.01
+    MODE = "train"
     """
     network_type = "cnn"
 
@@ -183,7 +185,7 @@ if __name__ == '__main__':
 
     # Prep input
     td = ToyData(TOY_DATADIR)
-    if(args.mode == 'train'):
+    if(MODE == 'train'):
         X, X_test, y, y_test = td.load_train()
 
         #proj_dir = "/projects/csiu_prj_results/PROJECTS/predictTissue"
@@ -245,8 +247,8 @@ if __name__ == '__main__':
 
     # Evaluation
     print(metrics.accuracy_score(y, np.argmax(get_output(X), axis=1)))
-    if(args.mode == 'train'):
         print(metrics.accuracy_score(y_test, np.argmax(get_output(X_test), axis=1)))
+    if (MODE == 'train'):            
     else:
         # Make predictions using trained model
         out_file = "{}-node{}-learn{}-epoch{}.csv".format(
