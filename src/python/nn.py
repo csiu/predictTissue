@@ -131,19 +131,19 @@ def build_cnn1d(shape, n_classes, num_filters, filter_size, pool_size):
     # Convolutional layer
     # (ReLU is the common nonlinearity in cnns)
     l_conv = lasagne.layers.Conv1DLayer(
-            l_in, num_filters=num_filters, filter_size=filter_size,
+            l_in, num_filters=num_filters[0], filter_size=filter_size[0],
             nonlinearity=lasagne.nonlinearities.rectify)
 
     # Pooling layer
     l_pool = lasagne.layers.MaxPool1DLayer(
-            l_conv, pool_size=pool_size)
+            l_conv, pool_size=pool_size[0])
 
     # (You can add more conv+pool layers)
     l_conv2 = lasagne.layers.Conv1DLayer(
-            l_pool, num_filters=num_filters, filter_size=filter_size,
+            l_pool, num_filters=num_filters[1], filter_size=filter_size[1],
             nonlinearity=lasagne.nonlinearities.rectify)
     l_pool2 = lasagne.layers.MaxPool1DLayer(
-            l_conv2, pool_size=pool_size)
+            l_conv2, pool_size=pool_size[1])
 
     # Output layer
     l_output = lasagne.layers.DenseLayer(
@@ -205,8 +205,10 @@ if __name__ == '__main__':
             X_new = reformat_input_matrix2convnet1d(X_new)
 
         network, input_var = build_cnn1d(
-                shape=(None, 1, X.shape[2]), n_classes=5,
-                num_filters=100, filter_size=(11), pool_size=(3))
+                shape=(None, 1, X.shape[2]), n_classes=10,
+                num_filters=[100, 50],
+                filter_size=[(11), (3)],
+                pool_size=[(5), (3)])
     else:
         network, input_var = build_mlp(shape=X.shape, num_classes=10, num_units=N_UNITS)
 
