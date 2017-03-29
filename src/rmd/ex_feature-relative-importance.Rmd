@@ -145,3 +145,4 @@ sprintf("Partial correlation: %0.3f", numer/denom)
 normalize_to_100(abs_cor_sum)
 ```
 
+- One possible issue is that we don't know the identities of the controlling random variables
