@@ -203,3 +203,53 @@ normalize_to_100(sum_sq_diff)
 *DA determines the dominance of one input over another by comparing their additional contributions across all subset models... approaches the problem of relative importance by examining the change in R^2 resulting from adding an input to all possible subset regression models... averaging all the possible models*
 
 - Issue: I'm want to infer variable importance from ANNs, not remodel the data with many linear models
+
+<br>
+<br>
+
+### Garson's algorithm
+
+$RI_x = \sum_{x=1}^n{\frac{|w_{xy}-w_{yz}|}{\sum_{y=1}^m{|w_{xy}-w_{yz}|}}}$
+
+```{r}
+# If i = input i; j = hidden j; and o = the single output,
+# Compute: w_ij * w_jo
+# for each value i and j
+#
+# Matrix of weights (4,3) multiplied by vector of hidden-output weights
+# Save the transposed result (3,4)
+(numer <-
+  (t(w$ih) * as.numeric(w$oh)) %>%
+   t()
+)
+
+# Sum of products of all inputs
+# Think: contribution from each hidden node
+# Eg. contribution from h1 = w_x1,h1*w_h1,o +
+#                            w_x2,h1*w_h1,o +
+#                            w_x3,h1*w_h1,o
+# Will get contribution score for h1, h2, h3, and h4
+#
+# input-hidden weights (3,4) %*% (4,4) diagonal matrix of hidden-output weights
+(denom <-
+  w$ih %*% diag(as.numeric(w$oh)) %>%
+  colSums()
+)
+
+# Take division to produce (3,4)
+# Take row sum to score the importance for each input
+(ga <-
+  (numer %*% diag(denom^-1)) %>%
+  rowSums()
+)
+
+# Normalize & sort
+normalize_to_100(ga)
+```
+
+<br>
+<br>
+
+### Partial derivative
+
+(Not enough information given for replication)
