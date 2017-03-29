@@ -23,7 +23,7 @@ w$ih <-
   t() %>%
   `colnames<-`(c("h1", "h2", "h3","h4"))
 
-w$ho <-
+w$oh <-
   data.frame(gy = c(-5.2075, 2.0158, -4.4617, 1.5858)) %>%
   t() %>%
   `colnames<-`(c("h1", "h2", "h3","h4"))
@@ -50,7 +50,7 @@ Here we show explicitly the calculations for input `x1`
 # w_x1,h2 * w_h2,gy
 # w_x1,h3 * w_h3,gy
 # w_x1,h4 * w_h4,gy
-(cw_prd_x1 <- w$ih[1,] * w$ho)
+(cw_prd_x1 <- w$ih[1,] * w$oh)
 
 # & then take the sum
 sum(cw_prd_x1)
@@ -62,7 +62,7 @@ We do the calculation for all inputs and get the following connection weight pro
 
 ```{r echo=FALSE}
 (cw_prd_sums <-
-  sapply(1:3, function(i){sum(w$ih[i,] * w$ho)}) %>%
+  sapply(1:3, function(i){sum(w$ih[i,] * w$oh)}) %>%
   setNames(., rownames(w$ih))
  )
 ```
