@@ -193,19 +193,19 @@ if __name__ == '__main__':
         #class_file = os.path.join(proj_dir, "metadata/tissueclass.txt")
         #df_X, df_y = LoadCustomTissueInput(input_file, class_file).load_data()
         #X, X_test, y, y_test = train_test_split(df_X, df_y, test_size=0.8)
+
+        if network_type == "cnn":
+            X = reformat_input_matrix2convnet1d(X)
+            X_test = reformat_input_matrix2convnet1d(X_test)
     else:
         X, y, X_new = td.load_test()
+        if network_type == "cnn":
+            X_new = reformat_input_matrix2convnet1d(X_new)
 
     # Prepare Theano variables for inputs and targets
     target_var = T.ivector('target_var')
 
     if network_type == "cnn":
-        X = reformat_input_matrix2convnet1d(X)
-        if(args.mode == 'train'):
-            X_test = reformat_input_matrix2convnet1d(X_test)
-        else:
-            X_new = reformat_input_matrix2convnet1d(X_new)
-
         network, input_var = build_cnn1d(
                 shape=(None, 1, X.shape[2]), n_classes=10,
                 num_filters=[100, 50],
