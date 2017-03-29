@@ -173,7 +173,7 @@ if __name__ == '__main__':
     MODE = args.mode
     """
     # For testing
-    N_UNITS = 10
+    N_UNITS = 100
     N_EPOCHS = 10
     LEARNING_RATE = 0.01
     MODE = "train"
