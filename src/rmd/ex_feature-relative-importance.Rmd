@@ -38,6 +38,8 @@ w
 
 $RI_x = \sum_{y=1}^m{w_{xy}w_{yz}}$
 
+- The mention the above equation in the paper, but I think they mean: $RI_x = \frac{\sum_{y=1}^m{w_{xy}w_{yz}}}{\sum_{x=1}^n{\sum_{y=1}^m{w_{xy}w_{yz}}}}$
+
 ----
 
 Here we show explicitly the calculations for input `x1`
