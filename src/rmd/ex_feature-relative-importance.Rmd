@@ -65,6 +65,12 @@ We do the calculation for all inputs and get the following connection weight pro
   sapply(1:3, function(i){sum(w$ih[i,] * w$oh)}) %>%
   setNames(., rownames(w$ih))
  )
+
+#You can do the same calculation by matrix multiplication
+# (cw_prd_sums <-
+#   (w$ih %*% t(w$oh)) %>% # Matrix multiplication shapes: (3,4) * (4,1)
+#   {setNames(as.numeric(.), rownames(.))}
+# )
 ```
 
 To calculate relative importance, we normalize and sort to find the most important feature
