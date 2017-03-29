@@ -8,7 +8,7 @@ setup()
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Examples are from the following:
+Information, data, & examples are from the following:
 
 > Ibrahim, OM. 2013. [A comparison of methods  for  assessing the  relative  importance of input variables in  artificial neural networks](http://www.palisade.com/downloads/pdf/academic/DTSpaper110915.pdf). Journal of Applied Sciences Research, 9(11): 5692-5700.
 
@@ -37,11 +37,9 @@ w
 
 $RI_x = \sum_{y=1}^m{w_{xy}w_{yz}}$
 
-- The mention the above equation in the paper, but I think they mean: $RI_x = \frac{\sum_{y=1}^m{w_{xy}w_{yz}}}{\sum_{x=1}^n{\sum_{y=1}^m{w_{xy}w_{yz}}}}$
-
 ----
 
-Here we show explicitly the calculations for input `x1`
+Here we show explicitly the calculations for the importance of input `x1`
 
 ```{r}
 # We first calculate the connection weight product of eg. input x1
@@ -72,10 +70,10 @@ We do the calculation for all inputs and get the following connection weight pro
 # )
 ```
 
-To calculate relative importance, we normalize and sort to find the most important feature
+To calculate relative importance, we normalize by all connection weight product sums.
 
 ```{r}
-# Helper to normalize scores
+# Helper function for calculating normalized scores
 normalize_to_100 <- function(x, sort=TRUE){
   (x / sum(x)*100) %>%
     sort(decreasing = sort)
@@ -83,6 +81,8 @@ normalize_to_100 <- function(x, sort=TRUE){
 
 normalize_to_100(cw_prd_sums)
 ```
+
+- Above is the equation mentioned in the paper, but to calculate the relative importance (out of 100%), I think they normalized by the total and thus the equation should be: $RI_x = \frac{\sum_{y=1}^m{w_{xy}w_{yz}}}{\sum_{x=1}^n{\sum_{y=1}^m{w_{xy}w_{yz}}}}$
 
 <br>
 <br>
@@ -161,7 +161,7 @@ normalize_to_100(abs_cor_sum)
 
 $RI_x = \frac{\sum_{x=1}^m{(w_{xy}^i - w_{xy}^f)^2}}{\sum_{x=1}^m{\sum_{y=1}^n{(w_{xy}^i - w_{xy}^f)^2}}}$
 
-Calculated by comparing the connection weights between the input and hidden layer of the initial (un-trained) and trained weights. Note: The connection weights between the hidden and output layer were not used.
+The metric is calculated by comparing the connection weights between the input and hidden layer of the initial (un-trained) and trained weights. Note: The connection weights between the hidden and output layer were not used.
 
 Table 7: Input-hidden initial connection weights.
 ```{r echo=FALSE}
