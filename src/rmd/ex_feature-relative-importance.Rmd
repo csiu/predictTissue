@@ -146,3 +146,37 @@ normalize_to_100(abs_cor_sum)
 ```
 
 - One possible issue is that we don't know the identities of the controlling random variables
+
+<br>
+<br>
+
+### The second proposed algorithm (MS) - Most Squares
+
+$RI_x = \frac{\sum_{x=1}^m{(w_{xy}^i - w_{xy}^f)^2}}{\sum_{x=1}^m{\sum_{y=1}^n{(w_{xy}^i - w_{xy}^f)^2}}}$
+
+Calculated by comparing the connection weights between the input and hidden layer of the initial (un-trained) and trained weights. Note: The connection weights between the hidden and output layer were not used.
+
+Table 7: Input-hidden initial connection weights.
+```{r echo=FALSE}
+w$ih_i <-
+  data.frame(x1 = c(0.0236, 0.1943, 0.1478, 0.2054),
+             x2 = c(0.0562, -0.3437, -0.3215, -0.0894),
+             x3 = c(-0.1488, 0.1844, -0.0608, 0.3267)) %>%
+  t() %>%
+  `colnames<-`(c("h1", "h2", "h3","h4"))
+
+w$ih_i
+```
+
+```{r}
+# Sum of squared of differences
+(sum_sq_diff <-
+  (w$ih_i - w$ih)^2 %>%
+  rowSums()
+)
+
+# Normalize & sort
+normalize_to_100(sum_sq_diff)
+```
+
+- Possible issues include (1) discrepancies depending on weight initialization & (2) output layer is removed (what of additional hidden layers?)
