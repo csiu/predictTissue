@@ -182,3 +182,18 @@ normalize_to_100(sum_sq_diff)
 ```
 
 - Possible issues include (1) discrepancies depending on weight initialization & (2) output layer is removed (what of additional hidden layers?)
+
+<br>
+<br>
+
+### Multiple Linear Regression (MLR)
+
+(Fancy way of calling linear regression with more than one explanatory variable; different from multivariate linear regression which refers to the case of multiple response variables.)
+
+- Issue: I'm want to infer variable importance from ANNs, not remodel the data with a linear model.
+
+### Dominance Analysis (DA)
+
+*DA determines the dominance of one input over another by comparing their additional contributions across all subset models... approaches the problem of relative importance by examining the change in R^2 resulting from adding an input to all possible subset regression models... averaging all the possible models*
+
+- Issue: I'm want to infer variable importance from ANNs, not remodel the data with many linear models
