@@ -6,6 +6,7 @@ output: html_document
 ```{r setup, include=FALSE}
 source(file.path(PROJHOME, "src/r/setup.R"))
 setup()
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 Examples are from the following:
@@ -13,7 +14,7 @@ Examples are from the following:
 > Ibrahim, OM. 2013. [A comparison of methods  for  assessing the  relative  importance of input variables in  artificial neural networks](http://www.palisade.com/downloads/pdf/academic/DTSpaper110915.pdf). Journal of Applied Sciences Research, 9(11): 5692-5700.
 
 Table 4: Final connection weights
-```{r network-weights}
+```{r network-weights, echo=FALSE}
 w <- NULL
 w$ih <-
   data.frame(x1 = c(-0.8604, 1.0651, -0.1392, 1.0666),
@@ -41,7 +42,7 @@ $RI_x = \sum_{y=1}^m{w_{xy}w_{yz}}$
 
 Here we show explicitly the calculations for input `x1`
 
-```{r echo=TRUE}
+```{r}
 # We first calculate the connection weight product of eg. input x1
 # w_x1,h1 * w_h1,gy
 # w_x1,h2 * w_h2,gy
@@ -57,7 +58,7 @@ sum(cw_prd_x1)
 
 We do the calculation for all inputs and get the following connection weight product sums (`cw_prd_sums`):
 
-```{r}
+```{r echo=FALSE}
 (cw_prd_sums <-
   sapply(1:3, function(i){sum(w$ih[i,] * w$ho)}) %>%
   setNames(., rownames(w$ih))
@@ -66,9 +67,14 @@ We do the calculation for all inputs and get the following connection weight pro
 
 To calculate relative importance, we normalize and sort to find the most important feature
 
-```{r echo=TRUE}
-(cw_prd_sums / sum(cw_prd_sums)*100) %>%
-  sort(decreasing = TRUE)
+```{r}
+# Helper to normalize scores
+normalize_to_100 <- function(x, sort=TRUE){
+  (x / sum(x)*100) %>%
+    sort(decreasing = sort)
+}
+
+normalize_to_100(cw_prd_sums)
 ```
 
 <br>
@@ -92,7 +98,7 @@ $r_{ij.k}=\frac{r_{ij} - r_{ki} \times r_{kj}}{\sqrt{(1-r_{ki}^2) \times (1-r_{k
 
 The following is from [SlideShare: What is a partial correlation?](https://www.slideshare.net/plummer48/what-is-a-partial-correlation) (Ken Plummer, 2014)
 
-```{r}
+```{r echo=FALSE}
 (dat <-
   data.frame(
     individual = letters[1:8],
@@ -106,13 +112,13 @@ The following is from [SlideShare: What is a partial correlation?](https://www.s
 
 The correlation between height and weight is 0.825
 
-```{r echo=TRUE}
+```{r}
 cor(dat$height, dat$weight, method="pearson") #default is pearson
 ```
 
 However, when controlling for gender (male=1; female=2) the correlation between height and weight is 0.770
 
-```{r echo=TRUE, results='hold'}
+```{r results='hold'}
 (r_ij <- cor(dat$height, dat$weight))
 (r_ki <- cor(dat$gender, dat$height))
 (r_kj <- cor(dat$gender, dat$weight))
@@ -127,3 +133,15 @@ sprintf("Partial correlation: %0.3f", numer/denom)
 > A partial correlation makes it possible to eliminate the effect of a third variable
 
 ----
+
+```{r}
+# Partial correlation from Table 6
+(r_ijk <- c(x1=0.5266, x2=0.9584, x3=0.7275))
+
+# Calculate absolute corrected sum
+(abs_cor_sum <- cw_prd_sums * r_ijk)
+
+# Normalize & sort for relative importance
+normalize_to_100(abs_cor_sum)
+```
+
