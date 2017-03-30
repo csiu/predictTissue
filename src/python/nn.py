@@ -8,20 +8,26 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
-
 import cPickle as pickle
 
 class PickleModel:
     def __init__(self, network, model_file):
         self.network = network
         self.model_file = model_file
+        self.param_file = "%s.npz" % model_file
 
-    def save_model(self, verbose=True):
+
+    def save_model(self, verbose=True, save_param_vals=True):
         if verbose: print("Saving model to: '%s'" % self.model_file)
         net_info = {'network': self.network,
                    'params': lasagne.layers.get_all_param_values(self.network)}
         pickle.dump(net_info, open(self.model_file, 'wb'),
                     protocol=pickle.HIGHEST_PROTOCOL)
+
+        if save_param_vals:
+            if verbose: print("Saving params to: '%s'" % self.param_file)
+            np.savez(self.param_file,
+                     *lasagne.layers.get_all_param_values(network))
 
     def load_model(self, verbose=True):
         if verbose: print("Loading model from: '%s'" % self.model_file)
