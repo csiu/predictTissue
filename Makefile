@@ -14,6 +14,9 @@ tss_bed := $(feature_dir)HS.GRCh37.75.gtf.chr.pcgene.tss.bed
 features_bed := $(feature_dir)features.bed
 
 # Features -------------------------------------------------------------------
+# Produces feature input file for training
+# CSV Format: sample_1,sample_2,sample_3,...
+
 feature_matrix := $(PROJDIR)results/features/promoter/input.txt
 all: $(feature_matrix)
 
