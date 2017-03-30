@@ -10,6 +10,10 @@ navbar:
         href: samples-h3k4me3.html
       - text: "Features"
         href: features.html
+    - text: "Reference"
+      menu:
+      - text: "Feature importance"
+        href: ex_feature-relative-importance.html
 
 output:
   html_document:
