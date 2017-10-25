@@ -1,6 +1,7 @@
 ## About
 
-`input.txt` is a CSV table representing whether H3K4me3 promoter signal is present ("1") or absent ("0") in a genomic bin. In total, there are 53 samples and 205,643 bins of interest.
+`input.txt` (created by using the [Makefile](../Makefile)) is a CSV table representing whether H3K4me3 promoter signal is present ("1") or absent ("0") in a genomic bin. In total, there are 53 samples and 205,643 bins of interest.
+
 
 ## Acknowledgement
 
