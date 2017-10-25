@@ -7,7 +7,7 @@ feature_matrix := $(PROJDIR)data/input.txt
 
 
 # ------------------------------------------------------------------------------
-# File Paths
+# File Paths (Note: These files are not committed to this repo)
 # ------------------------------------------------------------------------------
 
 # Aux files
