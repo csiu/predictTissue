@@ -1,4 +1,14 @@
-PROJDIR := /projects/csiu_prj_results/PROJECTS/predictTissue/
+PROJDIR := predictTissue/
+
+# The intention of this Makefile is to create data/input.txt for training
+# input.txt is a CSV formatted matrix file: sample_1,sample_2,sample_3,...
+# with value 0 = feature is absent and 1 = feature is present
+feature_matrix := $(PROJDIR)data/input.txt
+
+
+# ------------------------------------------------------------------------------
+# File Paths
+# ------------------------------------------------------------------------------
 
 # Aux files
 finder_list := $(PROJDIR)metadata/listoffiles.h3k4me3.finder.txt
@@ -13,14 +23,14 @@ ef_dir := $(feature_dir)extractFeatures_samples/
 tss_bed := $(feature_dir)HS.GRCh37.75.gtf.chr.pcgene.tss.bed
 features_bed := $(feature_dir)features.bed
 
-# Features -------------------------------------------------------------------
-# Produces feature input file for training
-# CSV Format: sample_1,sample_2,sample_3,...
 
-feature_matrix := $(PROJDIR)results/features/promoter/input.txt
+# ------------------------------------------------------------------------------
+# Create data/input.txt
+# ------------------------------------------------------------------------------
+
 all: $(feature_matrix)
 
-# Ensure enrichment files are there, a hack (FIXME)
+# Ensure enrichment files are there by creating symlinks in the right place
 $(finder_dir)%.bed.gz: $(finder_list)
 	perl -pe 's%^(.*)(CEMT_\d+)(.*)$$%[[ -L $(finder_dir)$$2.bed.gz ]] || ln -s $$1$$2$$3 $(finder_dir)$$2.bed.gz%' $< | sh
 
@@ -36,7 +46,7 @@ $(ef_dir)%.ef: $(finder_dir)%.bed.gz $(features_bed)
 		| awk -F'\t' -v sample_id='$*' 'BEGIN{print sample_id} {print $$NF}' \
 		> $@
 
-# Join
+# Join samples to make input.txt
 CEMT_samples := $(shell perl -pe 's/^.*(CEMT_\d+).*/$$1/' $(finder_list))
 $(feature_matrix): $(addprefix $(ef_dir), $(addsuffix .ef, $(CEMT_samples)))
 	paste -d',' $^ \
