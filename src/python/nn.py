@@ -253,8 +253,12 @@ if __name__ == '__main__':
 
     # Evaluation
     print(metrics.accuracy_score(y, np.argmax(get_output(X), axis=1)))
-        print(metrics.accuracy_score(y_test, np.argmax(get_output(X_test), axis=1)))
-    if (MODE == 'train'):            
+    if (MODE == 'train'):
+        try:
+            print(metrics.accuracy_score(y_test, np.argmax(get_output(X_test), axis=1)))
+        except:
+            print(get_output(X_test))
+            print(X_test.shape)
     else:
         # Make predictions using trained model
         out_file = "{}-node{}-learn{}-epoch{}.csv".format(
