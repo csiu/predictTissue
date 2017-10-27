@@ -10,7 +10,7 @@ First need to [test that GPU works](http://deeplearning.net/software/theano/tuto
 
 ## Convoluted Neural Network (CNN)
 
-Then want to construct a CNN ([test_cnn.py](test_cnn.py)).
+Then want to construct a CNN ([test_cnn.py](test_cnn.py), [nn.py](nn.py)).
 
 CNN structure might look like:
 
