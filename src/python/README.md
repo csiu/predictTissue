@@ -1,4 +1,10 @@
-Intent is to create and run neural network using GPU.
+_Intent is to build and train neural networks using GPU._
+
+## Workflow
+
+Use [Lasagne](https://github.com/Lasagne/Lasagne) to build and train neural networks in Theano.
+
+## Test GPU
 
 First need to [test that GPU works](http://deeplearning.net/software/theano/tutorial/using_gpu.html) ([test_gpu.py](test_gpu.py)).
 
