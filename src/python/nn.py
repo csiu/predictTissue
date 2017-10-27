@@ -183,6 +183,8 @@ if __name__ == '__main__':
     N_EPOCHS = 10
     LEARNING_RATE = 0.01
     MODE = "train"
+    TOY_DATADIR = "predictTissue/src/testdata"
+    MODEL_FILE  = "predictTissue/model/model-cnn_nf100p50_fs11p3_ps5p3_e100.txt"
     """
     network_type = "cnn"
 
