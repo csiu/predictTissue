@@ -26,3 +26,5 @@ You will also need to define the learning during training e.g.
 
 - What is the objective / loss function
 - how the weights are updated
+
+You can also train in batches.
